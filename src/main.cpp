@@ -2,7 +2,10 @@
 #include <iostream> 
 #include <cstdlib> 
 #include <ctime> 
-int main(int argc, char* argv[]) { 
+#include <windows.h> 
+
+int main(int argc, char* argv[]) {
+    SetConsoleOutputCP(CP_UTF8); 
     // Initialisation de l'aléatoire 
     std::srand(static_cast<unsigned int>(std::time(nullptr))); 
      
@@ -10,7 +13,7 @@ int main(int argc, char* argv[]) {
     std::cout << "=======================================" << std::endl; 
      
     // 🏗 Création du moteur de jeu 
-    Ecosystem::Core::GameEngine engine("Simulateur d'Écosystème Intelligent", 1200.0f, 600.0f);
+    Ecosystem::Core::GameEngine engine("Simulateur d'Écosystème Intelligent", 1200.0f, 800.0f);
      
     // ⚙Initialisation 
     if (!engine.Initialize()) { 

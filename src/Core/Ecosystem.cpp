@@ -83,15 +83,18 @@ void Ecosystem::HandleReproduction() {
             if (baby) { 
                  newEntities.push_back(std::move(baby)); 
                 mStats.birthsToday++; 
+            }
+        }
+    }            
     // Ajout des nouveaux entités 
     for (auto& newEntity : newEntities) { 
         mEntities.push_back(std::move(newEntity)); 
     }
-    }
-        } 
-            } 
+}
+        
+            
                
- } 
+ 
 // 🍽 GESTION DE L'ALIMENTATION 
 void Ecosystem::HandleEating() { 
     // Ici on implémenterait la logique de recherche de nourriture 
@@ -142,7 +145,7 @@ void Ecosystem::SpawnRandomEntity(EntityType type) {
     mEntities.push_back(std::make_unique<Entity>(type, position, name)); 
 } 
 // POSITION ALÉATOIRE 
-Vector2D Ecosystem::GetRandomPosition() const { 
+Vector2D Ecosystem::GetRandomPosition()  { 
     std::uniform_real_distribution<float> distX(0.0f, mWorldWidth); 
     std::uniform_real_distribution<float> distY(0.0f, mWorldHeight); 
     return Vector2D(distX(mRandomGenerator), distY(mRandomGenerator)); 
@@ -172,6 +175,6 @@ void Ecosystem::Render(SDL_Renderer* renderer) const {
     for (const auto& entity : mEntities) { 
         entity->Render(renderer); 
     }
-} 
+};
 } // namespace Core 
 } // namespace Ecosystem

@@ -7,7 +7,7 @@ namespace Core {
 // 🏗 CONSTRUCTEUR PRINCIPAL 
 Entity::Entity(EntityType type, Vector2D pos, std::string entityName) 
     : mType(type), position(pos), name(entityName),  
-      mRandomGenerator(std::random_device{}())  // Initialisation du générateur alé
+     mRandomGenerator(std::random_device{}())  // Initialisation du générateur alé
  { 
     // INITIALISATION SELON LE TYPE 
     switch(mType) { 
