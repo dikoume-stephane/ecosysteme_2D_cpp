@@ -1,6 +1,7 @@
 #include "Core/Ecosystem.h" 
 #include <algorithm> 
 #include <iostream> 
+
 namespace Ecosystem { 
 namespace Core { 
 // 🏗 CONSTRUCTEUR 

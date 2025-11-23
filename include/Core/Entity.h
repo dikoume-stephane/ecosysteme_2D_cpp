@@ -52,7 +52,7 @@ public:
     // MÉTHODES DE COMPORTEMENT 
     Vector2D SeekFood(const std::vector<Food>& foodSources) const; 
     Vector2D AvoidPredators(const std::vector<Entity>& predators) const; 
-    Vector2D StayInBounds(float worldWidth, float worldHeight) const; 
+    Vector2D StayInBounds(float worldWidth, float worldHeight) ; 
     // MÉTHODE DE RENDU 
     void Render(SDL_Renderer* renderer) const; 
 private: 
