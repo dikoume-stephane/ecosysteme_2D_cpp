@@ -90,6 +90,7 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
+            
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
             // Consommation d'énergie due au mouvement 
@@ -127,12 +128,40 @@ namespace Ecosystem
         } 
 
         // MÉTHODES DE COMPORTEMENT 
-       /*Vector2D Entity::SeekFood(const std::vector<Food>& foodSources) const
+       Vector2D Entity::SeekFood(const std::vector<Food>& foodSources) const
         {
-            return ;
-        }; 
 
-        Vector2D Entity::AvoidPredators(const std::vector<Entity>& predators) const
+            if(foodSources.empty())
+            {
+                Vector2D rien={0,0};
+                return rien;
+            } 
+            Vector2D trcfood =foodSources[0].position;
+            float dist =position.Distance( foodSources[0].position);
+            bool yn;
+            Vector2D vn;
+        
+            for (Food foodSource : foodSources)
+            { 
+                if (dist<position.Distance( foodSource.position))
+                {
+                    dist =position.Distance( foodSource.position);
+                    trcfood =foodSource.position;
+                    yn=true;
+                }
+                 
+            }
+
+            if (yn)
+            {
+                float norme = sqrt( trcfood.x*trcfood.x + trcfood.y*trcfood.y);
+                vn ={trcfood.x/norme , trcfood.y/norme};
+                
+            }
+            return vn;
+        }
+
+        /*Vector2D Entity::AvoidPredators(const std::vector<Entity>& predators) const
         {
             return ;
         };*/ 
@@ -144,7 +173,7 @@ namespace Ecosystem
             if(position.x>worldWidth) position.x =worldWidth;
             if(position.y>worldHeight) position.y =worldHeight;
             return position;
-        }; 
+        } 
 
         // VIEILLISSEMENT 
         void Entity::Age(float deltaTime)
