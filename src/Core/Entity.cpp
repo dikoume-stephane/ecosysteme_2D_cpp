@@ -90,6 +90,7 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
+            position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
             // Consommation d'énergie due au mouvement 
             mEnergy -= mVelocity.Distance(Vector2D(0, 0)) * deltaTime * 0.1f; 
@@ -140,8 +141,8 @@ namespace Ecosystem
         {
             if(position.x<0) position.x =0;
             if(position.y<0) position.y =0;
-            if(position.x>0) position.x =worldWidth;
-            if(position.y>0) position.y =worldHeight;
+            if(position.x>worldWidth) position.x =worldWidth;
+            if(position.y>worldHeight) position.y =worldHeight;
             return position;
         }; 
 
