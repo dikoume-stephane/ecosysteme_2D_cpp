@@ -90,6 +90,10 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
+            /*if(mEnergy<(mMaxEnergy*0.75f))
+            {
+
+            }*/
             
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
@@ -161,10 +165,23 @@ namespace Ecosystem
             return vn;
         }
 
-        /*Vector2D Entity::AvoidPredators(const std::vector<Entity>& predators) const
+        Vector2D Entity::AvoidPredators(const std::vector<Entity>& predators) const
         {
-            return ;
-        };*/ 
+            Vector2D fuit,observ;
+            float dis;
+            for (const Entity predator:predators)
+            {
+                if (mType!=predator.mType) continue;
+                observ ={position.x-predator.position.x , position.y-predator.position.y};
+                dis =sqrt( observ.x*observ.x + observ.y*observ.y);
+                if (dis<3.0f)
+                {
+                    fuit =fuit.operator+({observ.x/dis , observ.y/dis});
+                }
+
+            }
+            return fuit;
+        };
 
         Vector2D Entity::StayInBounds(float worldWidth, float worldHeight) 
         {

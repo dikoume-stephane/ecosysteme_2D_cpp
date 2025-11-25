@@ -48,7 +48,6 @@ namespace Ecosystem
             // Mise à jour de toutes les entités 
             for (auto& entity : mEntities) { 
                 entity->Update(deltaTime); 
-                entity->StayInBounds(  1200.0f, 800.0f) ;
             }
             // Gestion des comportements 
             HandleEating(); 
@@ -66,7 +65,7 @@ namespace Ecosystem
             for (int i = 0; i < count; ++i) { 
                 if (mFoodSources.size() < 100) {  // Limite maximale de nourriture 
                     Vector2D position = GetRandomPosition(); 
-                    mFoodSources.emplace_back(position, 25.0f); 
+                    AddFood(position, 25.0f); 
                 } 
             }
         } 
@@ -109,7 +108,7 @@ namespace Ecosystem
             // Ajout des nouveaux entités 
             for (auto& newEntity : newEntities)
             { 
-                mEntities.push_back(std::move(newEntity)); 
+                AddEntity(std::move(newEntity)); 
             }
         }
                 
@@ -170,7 +169,7 @@ namespace Ecosystem
                     name = "Plant_" + std::to_string(mStats.totalPlants); 
                     break; 
             }
-            mEntities.push_back(std::make_unique<Entity>(type, position, name)); 
+            AddEntity(std::make_unique<Entity>(type, position, name)); 
         } 
 
         // POSITION ALÉATOIRE 
@@ -193,15 +192,17 @@ namespace Ecosystem
         } 
 
         //methode de gestion
-        void AddEntity(std::unique_ptr<Entity> entity)
+        void Ecosystem::AddEntity(std::unique_ptr<Entity> entity)
         {
-
-        }; 
+            if (mEntities.size() >= mMaxEntities) return;
+            mEntities.push_back(std::move(entity));
+        }
         
-        void AddFood(Vector2D position, float energy = 25.0f)
+        void Ecosystem::AddFood(Vector2D position, float energy)
         {
-
-        }; 
+            Food nfood(position,energy);
+            mFoodSources.push_back(nfood);
+        }
 
         // RENDU 
         void Ecosystem::Render(SDL_Renderer* renderer) const
