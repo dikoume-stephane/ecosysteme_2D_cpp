@@ -65,13 +65,13 @@ namespace Ecosystem
         } 
 
         //⚙MISE À JOUR PRINCIPALE 
-        void Entity::Update(float deltaTime)
+        void Entity::Update(float deltaTime, const std::vector<Food>& foodsource, const std::vector<std::unique_ptr<Entity>>& allentities)
         { 
             if (!mIsAlive) return; 
             // PROCESSUS DE VIE 
             ConsumeEnergy(deltaTime); 
             Age(deltaTime); 
-            Move(deltaTime); 
+            Move(deltaTime, foodsource, allentities); 
             CheckVitality(); 
         } 
 
@@ -81,8 +81,9 @@ namespace Ecosystem
         }; 
 
         // MOUVEMENT 
-        void Entity::Move(float deltaTime)
+        void Entity::Move(float deltaTime, const std::vector<Food>& foodsource, const std::vector<std::unique_ptr<Entity>>& allentities)
         { 
+            
             if (mType == EntityType::PLANT) return;  // Les plantes ne bougent pas 
             // Comportement aléatoire occasionnel 
             std::uniform_real_distribution<float> chance(0.0f, 1.0f); 
@@ -90,10 +91,19 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
-            /*if(mEnergy<(mMaxEnergy*0.75f))
+            if(mEnergy<(mMaxEnergy*0.5f))
             {
-
-            }*/
+                switch(mType)
+                {
+                case EntityType::CARNIVORE:
+                position = position.operator+(SeekFood(allentities));
+                break;
+                case EntityType::HERBIVORE:
+                position = position.operator+(SeekFood(foodsource));
+                break;
+                }
+                
+            }
             
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
@@ -142,39 +152,60 @@ namespace Ecosystem
             } 
             Vector2D trcfood =foodSources[0].position;
             float dist =position.Distance( foodSources[0].position);
-            bool yn;
-            Vector2D vn;
         
             for (Food foodSource : foodSources)
             { 
-                if (dist<position.Distance( foodSource.position))
+                if (dist>position.Distance( foodSource.position))
                 {
                     dist =position.Distance( foodSource.position);
                     trcfood =foodSource.position;
-                    yn=true;
                 }
                  
             }
-
-            if (yn)
-            {
-                float norme = sqrt( trcfood.x*trcfood.x + trcfood.y*trcfood.y);
-                vn ={trcfood.x/norme , trcfood.y/norme};
-                
-            }
-            return vn;
+            trcfood ={position.x-trcfood.x,position.y-trcfood.y};
+            trcfood =trcfood.operator*(0.025f);
+            return trcfood;
         }
 
-        Vector2D Entity::AvoidPredators(const std::vector<Entity>& predators) const
+        Vector2D Entity::SeekFood(const std::vector<std::unique_ptr<Entity>>& entityfood) const
+        {
+
+            if(entityfood.empty())
+            {
+                Vector2D rien={0,0};
+                return rien;
+            }
+            
+            Vector2D trcfood;
+            float dist =3000.f;
+            
+        
+            for (const std::unique_ptr<Entity>& foodSource : entityfood)
+            { 
+                const Entity& entfood = *foodSource;
+                if (dist>position.Distance( entfood.position))
+                {
+                    dist =position.Distance( entfood.position);
+                    trcfood =entfood.position;
+                }
+                 
+            }
+            trcfood ={position.x-trcfood.x,position.y-trcfood.y};
+            trcfood =trcfood.operator*(0.025f);
+            return trcfood;
+        }
+
+        Vector2D Entity::AvoidPredators(const std::vector<std::unique_ptr<Entity>>& predators) const
         {
             Vector2D fuit,observ;
             float dis;
-            for (const Entity predator:predators)
+            for (const std::unique_ptr<Entity>& predator: predators)
             {
-                if (mType!=predator.mType) continue;
-                observ ={position.x-predator.position.x , position.y-predator.position.y};
+                const Entity& predat =*predator;
+                if (mType !=predat.mType) continue;
+                observ ={position.x-predat.position.x , position.y-predat.position.y};
                 dis =sqrt( observ.x*observ.x + observ.y*observ.y);
-                if (dis<3.0f)
+                if (dis<50.0f)
                 {
                     fuit =fuit.operator+({observ.x/dis , observ.y/dis});
                 }
