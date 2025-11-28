@@ -92,7 +92,7 @@ namespace Ecosystem
             }
             // Application du mouvement 
             if (mType==EntityType::HERBIVORE) position = position.operator+(AvoidPredators(allentities));
-            /*if(mEnergy<(mMaxEnergy*0.5f))
+            if(mEnergy<(mMaxEnergy*0.5f))
             {
                 switch(mType)
                 {
@@ -104,7 +104,7 @@ namespace Ecosystem
                 break;
                 }
                 
-            }*/
+            }
             
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
