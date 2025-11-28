@@ -91,7 +91,8 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
-            if(mEnergy<(mMaxEnergy*0.5f))
+            if (mType==EntityType::HERBIVORE) position = position.operator+(AvoidPredators(allentities));
+            /*if(mEnergy<(mMaxEnergy*0.5f))
             {
                 switch(mType)
                 {
@@ -103,7 +104,7 @@ namespace Ecosystem
                 break;
                 }
                 
-            }
+            }*/
             
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
@@ -147,24 +148,31 @@ namespace Ecosystem
 
             if(foodSources.empty())
             {
-                Vector2D rien={0,0};
+                Vector2D rien={0.f,0.f};
                 return rien;
             } 
-            Vector2D trcfood =foodSources[0].position;
-            float dist =position.Distance( foodSources[0].position);
+            Vector2D trcfood;
+            float mindist=9900.f,distvision =230.f,dist=0.f;
         
             for (Food foodSource : foodSources)
             { 
-                if (dist>position.Distance( foodSource.position))
+                dist =position.Distance( foodSource.position);
+                if (mindist>dist && dist<distvision)
                 {
-                    dist =position.Distance( foodSource.position);
+                    mindist =dist;
                     trcfood =foodSource.position;
                 }
-                 
             }
-            trcfood ={position.x-trcfood.x,position.y-trcfood.y};
-            trcfood =trcfood.operator*(0.025f);
-            return trcfood;
+            if( mindist==9900.f)
+            {
+                return {0.f,0.f};
+            }
+            trcfood ={trcfood.x-position.x,trcfood.y-position.y};
+            float norm =sqrt(trcfood.x*trcfood.x+trcfood.y*trcfood.y);
+
+            Vector2D direction={trcfood.x/norm,trcfood.y/norm};
+            direction =direction.operator*(0.25f);
+            return direction;
         }
 
         Vector2D Entity::SeekFood(const std::vector<std::unique_ptr<Entity>>& entityfood) const
@@ -177,22 +185,33 @@ namespace Ecosystem
             }
             
             Vector2D trcfood;
-            float dist =3000.f;
+            float mindist=9900.f,distvision =330.f,dist=0.f;
             
         
             for (const std::unique_ptr<Entity>& foodSource : entityfood)
-            { 
+            {
                 const Entity& entfood = *foodSource;
-                if (dist>position.Distance( entfood.position))
+                if (entfood.mType ==EntityType::HERBIVORE)
                 {
-                    dist =position.Distance( entfood.position);
-                    trcfood =entfood.position;
+                    dist=position.Distance( entfood.position);
+                    if (mindist>dist && dist<distvision)
+                    {
+                        mindist =dist;
+                        trcfood =entfood.position;
+                    }
                 }
-                 
             }
-            trcfood ={position.x-trcfood.x,position.y-trcfood.y};
-            trcfood =trcfood.operator*(0.025f);
-            return trcfood;
+
+            if( mindist==9900.f)
+            {
+                return {0.f,0.f};
+            }
+            trcfood ={trcfood.x-position.x,trcfood.y-position.y};
+            float norm =sqrt(trcfood.x*trcfood.x+trcfood.y*trcfood.y);
+
+            Vector2D direction={trcfood.x/norm,trcfood.y/norm};
+            direction =direction.operator*(0.25f);
+            return direction;
         }
 
         Vector2D Entity::AvoidPredators(const std::vector<std::unique_ptr<Entity>>& predators) const
@@ -205,14 +224,21 @@ namespace Ecosystem
                 if (mType !=predat.mType) continue;
                 observ ={position.x-predat.position.x , position.y-predat.position.y};
                 dis =sqrt( observ.x*observ.x + observ.y*observ.y);
-                if (dis<50.0f)
+                if (dis<100.0f && dis>0.01f)
                 {
-                    fuit =fuit.operator+({observ.x/dis , observ.y/dis});
+                    fuit =fuit.operator+({observ.x/(dis*dis), observ.y/(dis*dis)});
                 }
-
             }
+            if(fuit.x==0.0f && fuit.y==0.0f)
+            {
+                return fuit;
+            }
+
+            float norm =sqrt(fuit.x*fuit.x+fuit.y*fuit.y);
+            fuit ={fuit.x/norm, fuit.y/norm};
+            fuit =fuit.operator*(0.25f);
             return fuit;
-        };
+        }
 
         Vector2D Entity::StayInBounds(float worldWidth, float worldHeight) 
         {

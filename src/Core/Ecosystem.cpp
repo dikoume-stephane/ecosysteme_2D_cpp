@@ -47,7 +47,7 @@ namespace Ecosystem
         { 
             // Mise à jour de toutes les entités 
             for (auto& entity : mEntities) { 
-                entity->Update(deltaTime, mFoodSources, allentyfood); 
+                entity->Update(deltaTime, mFoodSources, mEntities); 
             }
             // Gestion des comportements 
             HandleEating(); 
@@ -108,8 +108,7 @@ namespace Ecosystem
             // Ajout des nouveaux entités 
             for (auto& newEntity : newEntities)
             { 
-                AddEntity(std::move(newEntity));
-                allentyfood.push_back(*newEntity);
+                AddEntity(std::move(newEntity)); 
             }
         }
                 
@@ -170,8 +169,7 @@ namespace Ecosystem
                     name = "Plant_" + std::to_string(mStats.totalPlants); 
                     break; 
             }
-            AddEntity(std::make_unique<Entity>(type, position, name));
-            allentyfood.push_back(Entity(type, position, name));
+            AddEntity(std::make_unique<Entity>(type, position, name)); 
         } 
 
         // POSITION ALÉATOIRE 

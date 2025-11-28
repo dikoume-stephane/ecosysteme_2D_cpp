@@ -50,8 +50,9 @@ public:
     EntityType GetType() const { return mType; } 
     Vector2D GetVelocity() const { return mVelocity; } 
     // MÉTHODES DE COMPORTEMENT 
-    Vector2D SeekFood(const std::vector<Food>& foodSources) const; 
-    Vector2D AvoidPredators(const std::vector<Entity>& predators) const; 
+    Vector2D SeekFood(const std::vector<Food>& foodSources) const;
+    Vector2D SeekFood(const std::vector<std::unique_ptr<Entity>>& entityfood) const; 
+    Vector2D AvoidPredators(const std::vector<std::unique_ptr<Entity>>& predators) const; 
     Vector2D StayInBounds(float worldWidth, float worldHeight);
     // MÉTHODE DE RENDU 
     void Render(SDL_Renderer* renderer) const; 
