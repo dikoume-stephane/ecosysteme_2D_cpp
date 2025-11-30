@@ -31,18 +31,40 @@ enum class EntityType { }; // ÉNUMÉRATION DES TYPES D'ENTITÉS
 
 ### **classes**
 
-### **'Entity'** avec pour methodes
+### **'Entity'** 
 ```cpp
 class Entity { };
 ```
 
 
-### **'Ecosystem'** avec pour methodes
+### **'Ecosystem'** 
 ```cpp
 class Ecosystem { };
 ```
 
 ---
+
+#### **arboressance du projet**
+```cpp
+ecosystem_simulator/
+├── include/
+│   ├── Core/
+│   │   ├── Structs.hpp
+│   │   ├── Entity.hpp
+│   │   └── Ecosystem.hpp
+│   └── Graphics/
+│       └── Window.hpp
+├── src/
+│   ├── Core/
+│   │   ├── Entity.cpp
+│   │   └── Ecosystem.cpp
+│   ├── Graphics/
+│   │   └── Window.cpp
+│   └── main.cpp
+├── assets/
+│   └── (futures textures)
+└── README.md
+```
 
 ## **📁 FICHIERS DU PROJET**
 
@@ -1292,8 +1314,8 @@ sachez que la tache etait difficile , tres difficile , mais ce qu'il faut reteni
 > *"This too shall pass away 🤞😌.
 "*  
 > **- 2D.S**
-> **-version française :**
 
+> **-version française :**
 > *"le bon comme le mauvais à une fin ."*  
 
 ---
