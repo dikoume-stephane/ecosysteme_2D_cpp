@@ -68,16 +68,65 @@ namespace Ecosystem
         void Entity::Update(float deltaTime, const std::vector<Food>& foodsource, const std::vector<std::unique_ptr<Entity>>& allentities)
         { 
             if (!mIsAlive) return; 
-            // PROCESSUS DE VIE 
+            // PROCESSUS DE VIE
+            for (const std::unique_ptr<Entity>& predator : allentities)
+            {
+                Entity& predat = *predator;
+                if (predat.mType ==EntityType::HERBIVORE && mType ==EntityType::CARNIVORE)
+                {
+                float dist =position.Distance(predat.position);
+                if (dist<=3.0f)
+                {
+                    Eat(predat.mEnergy);
+                    predat.mEnergy=0.0f;
+                }
+                }
+            }
+
+            for (Food proie : foodsource)
+            {
+                if (mType ==EntityType::HERBIVORE)
+                {
+                float dist =position.Distance(proie.position);
+                if (dist<=3.0f)
+                {
+                    Eat(25.0f);
+                    proie.energyValue -=25.0f;
+                }
+                }
+            }
             ConsumeEnergy(deltaTime); 
             Age(deltaTime); 
             Move(deltaTime, foodsource, allentities); 
             CheckVitality(); 
         } 
 
-        void ApplyForce(Vector2D force)
+        void Entity::ApplyForce(Vector2D force)
         {
-
+             mVelocity = mVelocity.operator+(force);
+             switch (mType)
+             {
+                case EntityType::CARNIVORE:
+                {
+                    float vc =sqrt(mVelocity.x*mVelocity.x + mVelocity.y*mVelocity.y);
+                    if (vc>1.5)
+                    {
+                        Vector2D  nVelocity={mVelocity.x/vc,mVelocity.y/vc};
+                        mVelocity =nVelocity.operator*(1.5);
+                    }
+                    break;
+                }
+                case EntityType::HERBIVORE:
+                {
+                    float vh =sqrt(mVelocity.x*mVelocity.x + mVelocity.y*mVelocity.y);
+                    if (vh>1.0f)
+                    {
+                        Vector2D  nVelocity2={mVelocity.x/vh,mVelocity.y/vh};
+                        mVelocity =nVelocity2.operator*(1.0f);
+                    }
+                    break;
+                }
+            }
         }; 
 
         // MOUVEMENT 
@@ -91,16 +140,17 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
-            if (mType==EntityType::HERBIVORE) position = position.operator+(AvoidPredators(allentities));
+            if (mType==EntityType::HERBIVORE) ApplyForce(AvoidPredators(allentities));
             if(mEnergy<(mMaxEnergy*0.5f))
             {
                 switch(mType)
                 {
                 case EntityType::CARNIVORE:
-                position = position.operator+(SeekFood(allentities));
+                ApplyForce(SeekFood(allentities));
                 break;
+                
                 case EntityType::HERBIVORE:
-                position = position.operator+(SeekFood(foodsource));
+                ApplyForce(SeekFood(foodsource));
                 break;
                 }
                 
@@ -271,7 +321,7 @@ namespace Ecosystem
         // REPRODUCTION 
         bool Entity::CanReproduce() const
         { 
-            return mIsAlive && mEnergy > mMaxEnergy * 0.8f && mAge > 20; 
+            return mIsAlive && mEnergy > mMaxEnergy  && mAge > 20; 
         } 
 
         std::unique_ptr<Entity> Entity::Reproduce()
