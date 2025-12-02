@@ -68,8 +68,8 @@ namespace Ecosystem
         void Entity::Update(float deltaTime, const std::vector<Food>& foodsource, const std::vector<std::unique_ptr<Entity>>& allentities)
         { 
             if (!mIsAlive) return; 
-            // PROCESSUS DE VIE
-            for (const std::unique_ptr<Entity>& predator : allentities)
+        
+            for (const std::unique_ptr<Entity>& predator : allentities)//logique de mengement pour les carnivores
             {
                 Entity& predat = *predator;
                 if (predat.mType ==EntityType::HERBIVORE && mType ==EntityType::CARNIVORE)
@@ -83,7 +83,7 @@ namespace Ecosystem
                 }
             }
 
-            for (Food proie : foodsource)
+            for (Food proie : foodsource)//logique de mengement pour les herbivores
             {
                 if (mType ==EntityType::HERBIVORE)
                 {
@@ -95,12 +95,20 @@ namespace Ecosystem
                 }
                 }
             }
+            // PROCESSUS DE VIE
             ConsumeEnergy(deltaTime); 
             Age(deltaTime); 
             Move(deltaTime, foodsource, allentities); 
             CheckVitality(); 
         } 
 
+        /**
+         * appliquer une force (vitesse et direction ) à une entitée
+         * @param force: vecteur à appliquer à la velocitée
+         * on recupere un vecteur et on l'additionne à la velocité pour donner une direction à l'entitée
+         * on met une condition sur la vitesse maximale des canivore et on normalise
+         * pariel pour les herbivores 
+         */
         void Entity::ApplyForce(Vector2D force)
         {
              mVelocity = mVelocity.operator+(force);
@@ -130,6 +138,14 @@ namespace Ecosystem
         }; 
 
         // MOUVEMENT 
+
+        /**
+         *gere le deplacement de toutes les entitées en foction du temp
+         * @param deltaTime: réel representant le facteur d'evolution du temps
+         * @param foodsource: liste de toute les sources de nourriture de la map
+         * @param allentities: liste de toutesles entitées de la map
+         * gérer le comportement des entitées 
+         */
         void Entity::Move(float deltaTime, const std::vector<Food>& foodsource, const std::vector<std::unique_ptr<Entity>>& allentities)
         { 
             
@@ -140,7 +156,11 @@ namespace Ecosystem
                 mVelocity = GenerateRandomDirection(); 
             }
             // Application du mouvement 
+
+            //les herbivors fuient les predateurs
             if (mType==EntityType::HERBIVORE) ApplyForce(AvoidPredators(allentities));
+            
+            //recherche de la nourriture lors que l'energie est basse
             if(mEnergy<(mMaxEnergy*0.5f))
             {
                 switch(mType)
@@ -156,6 +176,7 @@ namespace Ecosystem
                 
             }
             
+            //empecher la sortie de l'ecrant
             position =StayInBounds(  1200.0f, 800.0f) ;
             position = position + mVelocity * deltaTime * 20.0f; 
             // Consommation d'énergie due au mouvement 
@@ -193,6 +214,20 @@ namespace Ecosystem
         } 
 
         // MÉTHODES DE COMPORTEMENT 
+
+        //premier seekfood pour les herbivores
+        /**
+         * recherche la nourriture la plus proche et renvoi le vecteur vers sa position
+         * @param foodsource: liste de toute les sources de nourriture de la map
+         * @return:vecteur vres la position de la nourriture
+         * si la liste de nourrture est vide on ne retourne rien
+         * on parcoure la liste de food 
+         * pour chaque source de nouriture on calcul la distance entre celle si et notre entité
+         * on compare cette distance à la distance mnimale de vision 
+         * et on cherche la plus petite distance (source la pljs proche)
+         * on retourne le vecteur vers cette source
+         * on normalise pour eviter un vecteur trop grand
+         */
        Vector2D Entity::SeekFood(const std::vector<Food>& foodSources) const
         {
 
@@ -225,6 +260,20 @@ namespace Ecosystem
             return direction;
         }
 
+        //seekfod pour les carnivores
+         /**
+         * recherche la nourriture la plus proche et renvoi le vecteur vers sa position
+         * @param entityfood: liste de toute les entitées de la map
+         * @return:vecteur vres la position de la nourriture
+         * si la liste d'entitées est vide on ne retourne rien
+         * on parcoure la liste d'entitées
+         * pour chaque entitée on verifisi c'est un herbivore
+         * si oui on calcul la distance entre celle si et notre entité
+         * on compare cette distance à la distance mnimale de vision 
+         * et on cherche la plus petite distance (source la pljs proche)
+         * on retourne le vecteur vers cette source
+         * on normalise pour eviter un vecteur trop grand
+         */
         Vector2D Entity::SeekFood(const std::vector<std::unique_ptr<Entity>>& entityfood) const
         {
 
@@ -264,19 +313,35 @@ namespace Ecosystem
             return direction;
         }
 
-        Vector2D Entity::AvoidPredators(const std::vector<std::unique_ptr<Entity>>& predators) const
+        /**
+         * recherche les predateurs les plus proches et renvois un vecteur de fuite vers une direction optimale
+         * @param allentities: liste de toute les entitées de la map
+         * @return:vecteur de fuite
+         * si la liste d'entitées est vide on ne retourne rien
+         * on parcoure la liste d'entitées
+         * pour chaque entitée on verifisi c'est un carnivore
+         * si oui on calcul la distance entre celle si et notre entité
+         * on compare cette distance à la distance mnimale de vision
+         * et si elle est assé proche on addition au vecteur de fuite l'inverse de cette position
+         * on normalise pour eviter un vecteur trop grand 
+         * et on cherche la plus petite distance (source la pljs proche)
+         * on retourne le vecteur de fuite
+         * on normalise pour eviter un vecteur trop grand
+         */
+        Vector2D Entity::AvoidPredators(const std::vector<std::unique_ptr<Entity>>& allentities) const
         {
             Vector2D fuit,observ;
-            float dis;
-            for (const std::unique_ptr<Entity>& predator: predators)
+            float Norm,dis,distmin =250.0f;
+            for (const std::unique_ptr<Entity>& predator: allentities)
             {
                 const Entity& predat =*predator;
                 if (mType !=predat.mType) continue;
-                observ ={position.x-predat.position.x , position.y-predat.position.y};
-                dis =sqrt( observ.x*observ.x + observ.y*observ.y);
-                if (dis<100.0f && dis>0.01f)
+                dis =position.Distance(predat.position);
+                if (dis<distmin && dis>0.01f)
                 {
-                    fuit =fuit.operator+({observ.x/(dis*dis), observ.y/(dis*dis)});
+                    observ ={position.x-predat.position.x , position.y-predat.position.y};
+                    Norm =sqrt( observ.x*observ.x + observ.y*observ.y);
+                    fuit =fuit.operator+({observ.x/(Norm*Norm), observ.y/(Norm*Norm)});
                 }
             }
             if(fuit.x==0.0f && fuit.y==0.0f)
@@ -290,12 +355,20 @@ namespace Ecosystem
             return fuit;
         }
 
+        /**
+         * corrige la position des entitées pour les empecher de sortir de la map
+         * @param worldWidth:hauteur de la map
+         * @param worldHeight:largeur de la map
+         * @return: vecteur de correction
+         * on corrige l'abscice et l'ordonnée de l'entitée si elle est trop proche des limittes de la map
+         * on retourne le vecteur corrigé
+         */
         Vector2D Entity::StayInBounds(float worldWidth, float worldHeight) 
         {
-            if(position.x<0) position.x =0;
-            if(position.y<0) position.y =0;
-            if(position.x>worldWidth) position.x =worldWidth;
-            if(position.y>worldHeight) position.y =worldHeight;
+            if(position.x<0) position.x =6;
+            if(position.y<0) position.y =6;
+            if(position.x>worldWidth) position.x =worldWidth-6;
+            if(position.y>worldHeight) position.y =worldHeight-6;
             return position;
         } 
 
@@ -321,7 +394,7 @@ namespace Ecosystem
         // REPRODUCTION 
         bool Entity::CanReproduce() const
         { 
-            return mIsAlive && mEnergy > mMaxEnergy  && mAge > 20; 
+            return mIsAlive && mEnergy > mMaxEnergy*0.9f  && mAge > 20; 
         } 
 
         std::unique_ptr<Entity> Entity::Reproduce()
